@@ -68,6 +68,14 @@
         .animate-pop {
             animation: popIn 0.35s forwards;
         }
+        @keyframes spotlightPulse {
+            0% { transform: scale(0.92); box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.55); }
+            50% { transform: scale(1.03); box-shadow: 0 0 32px 8px rgba(250, 204, 21, 0.35); }
+            100% { transform: scale(1); box-shadow: 0 20px 50px rgba(88, 28, 135, 0.85); }
+        }
+        .spotlight-dramatic {
+            animation: popIn 0.35s forwards, spotlightPulse 1.4s ease-in-out 1;
+        }
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
@@ -83,79 +91,86 @@
         <canvas id="gameCanvas" width="1600" height="900"></canvas>
 
         <!-- HEADER: Tiêu đề & Trạng thái Giai đoạn -->
-        <div class="absolute top-3 left-4 right-4 flex justify-between items-start pointer-events-none z-10">
-            <!-- Logo & Tên Game -->
-            <div class="bg-white/95 backdrop-blur-md px-5 py-2.5 rounded-2xl shadow-lg border-2 border-amber-400 flex items-center gap-3 pointer-events-auto">
-                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-2xl shadow-inner">
-                    <i class="fa-solid fa-sailboat"></i>
-                </div>
-                <div>
-                    <h1 class="font-title text-2xl md:text-3xl font-extrabold text-amber-900 leading-none tracking-wide">NGƯỜI LÁI ĐÒ</h1>
-                </div>
+        <div class="absolute top-2.5 left-3.5 right-3.5 flex justify-between items-center gap-2 pointer-events-none z-10">
+            <!-- PHẦN 1: Logo gọn 1 dòng (~55% diện tích) -->
+            <div class="bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-lg shadow border border-amber-400 flex items-center gap-1.5 pointer-events-auto shrink-0">
+                <span class="text-sm leading-none">⛵</span>
+                <h1 class="font-title text-xs md:text-sm font-extrabold text-amber-900 leading-none tracking-wide whitespace-nowrap">NGƯỜI LÁI ĐÒ</h1>
             </div>
 
             <!-- Bảng hiển thị Thời gian, Giai đoạn & Thống kê -->
-            <div class="flex items-center gap-2.5 pointer-events-auto flex-wrap justify-end">
-                <!-- Đồng hồ đếm ngược & Chọn nhanh thời gian -->
-                <div class="bg-rose-600 text-white px-4 py-1.5 rounded-2xl shadow-lg border-2 border-rose-300 flex items-center gap-2.5 font-title">
-                    <i class="fa-solid fa-clock text-yellow-300 text-lg animate-pulse"></i>
-                    <span id="timer-display" class="text-xl md:text-2xl font-extrabold tracking-wider min-w-[60px] text-center">00:20</span>
-                    <select id="quick-duration-select" class="bg-rose-800 hover:bg-rose-900 text-yellow-200 text-xs font-sans font-extrabold px-2 py-1 rounded-lg border border-rose-400 focus:outline-none cursor-pointer" title="Chọn thời gian di chuyển">
-                        <option value="10">10 giây</option>
-                        <option value="15">15 giây</option>
-                        <option value="20" selected>20 giây</option>
-                        <option value="30">30 giây</option>
-                        <option value="45">45 giây</option>
-                        <option value="60">60 giây</option>
-                    </select>
+            <div class="flex items-center gap-2 pointer-events-auto flex-wrap justify-end">
+                <!-- PHẦN 3: Gom cụm Đồng hồ đếm ngược & Trạng thái giai đoạn -->
+                <div id="phase-badge" class="bg-slate-900/90 backdrop-blur-md text-white px-3 py-1.5 rounded-xl shadow-md border-2 border-sky-400/80 flex items-center gap-2">
+                    <div class="flex items-center gap-1.5 text-rose-300 font-title">
+                        <i class="fa-solid fa-clock text-yellow-300 text-sm animate-pulse"></i>
+                        <span id="timer-display" class="text-base md:text-lg font-extrabold tracking-wider text-white">00:20</span>
+                        <select id="quick-duration-select" class="bg-rose-700 hover:bg-rose-800 text-yellow-200 text-[11px] font-sans font-extrabold px-1.5 py-0.5 rounded-md border border-rose-400/70 focus:outline-none cursor-pointer" title="Chọn thời gian di chuyển">
+                            <option value="10">10s</option>
+                            <option value="15">15s</option>
+                            <option value="20" selected>20s</option>
+                            <option value="30">30s</option>
+                            <option value="45">45s</option>
+                            <option value="60">60s</option>
+                        </select>
+                    </div>
+                    <span class="text-slate-500 font-bold">|</span>
+                    <div class="flex items-center gap-1.5 text-xs md:text-sm font-bold text-sky-100">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
+                        <span id="phase-text" class="truncate max-w-[210px]">Bến Đò Làng (Chuẩn bị)</span>
+                    </div>
                 </div>
 
-                <div id="phase-badge" class="bg-sky-900/90 backdrop-blur-md text-white px-4 py-2 rounded-2xl shadow-lg border-2 border-sky-400 flex items-center gap-2 font-bold text-sm md:text-base">
-                    <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span id="phase-text">Bến Đò Làng (Chuẩn bị)</span>
-                </div>
-
-                <div class="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-lg border-2 border-slate-300 flex items-center gap-3.5 text-xs md:text-sm font-extrabold">
-                    <div class="flex items-center gap-1.5 text-blue-700" title="Tổng số học sinh">
-                        <i class="fa-solid fa-users text-base"></i>
+                <!-- Cụm thống kê gọn -->
+                <div class="bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-md border-2 border-slate-300 flex items-center gap-2.5 text-xs font-extrabold">
+                    <div class="flex items-center gap-1 text-blue-700" title="Tổng số học sinh">
+                        <i class="fa-solid fa-users"></i>
                         <span>Sĩ số: <span id="stat-total">12</span></span>
                     </div>
-                    <div class="flex items-center gap-1.5 text-purple-700" title="Học sinh ngủ quên bị gọi tên">
-                        <i class="fa-solid fa-bed text-base"></i>
-                        <span>Ngủ quên: <span id="stat-sleeping">?</span></span>
+                    <span class="text-slate-300">|</span>
+                    <div class="flex items-center gap-1 text-purple-700" title="Học sinh ngủ quên bị gọi tên">
+                        <i class="fa-solid fa-bed"></i>
+                        <span>Ngủ: <span id="stat-sleeping">?</span></span>
                     </div>
-                    <div class="flex items-center gap-1.5 text-emerald-700" title="Học sinh vào trường">
-                        <i class="fa-solid fa-school text-base"></i>
-                        <span>Vào trường: <span id="stat-school">0</span></span>
+                    <span class="text-slate-300">|</span>
+                    <div class="flex items-center gap-1 text-emerald-700" title="Học sinh vào trường">
+                        <i class="fa-solid fa-school"></i>
+                        <span>Trường: <span id="stat-school">0</span></span>
                     </div>
                 </div>
 
-                <!-- Nút Âm thanh & Cài đặt -->
-                <button id="btn-sound" class="btn-game bg-amber-500 hover:bg-amber-400 border-amber-700 text-white w-11 h-11 rounded-2xl shadow-lg flex items-center justify-center text-lg" title="Bật/Tắt âm thanh">
+                <!-- Nút Âm thanh & Cài đặt (PHẦN 4: Ẩn nút Micro, giữ nguyên logic trong DOM & JS) -->
+                <button id="btn-sound" class="btn-game bg-amber-500 hover:bg-amber-400 border-amber-700 text-white w-9 h-9 rounded-xl shadow-md flex items-center justify-center text-sm" title="Bật/Tắt âm thanh">
                     <i id="icon-sound" class="fa-solid fa-volume-high"></i>
                 </button>
-                <button id="btn-open-settings" class="btn-game bg-indigo-600 hover:bg-indigo-500 border-indigo-800 text-white px-4 h-11 rounded-2xl shadow-lg flex items-center gap-2 font-bold text-sm" title="Thiết lập danh sách học sinh & thời gian">
+                <button id="btn-voice" class="hidden" aria-hidden="true" tabindex="-1">
+                    <i id="icon-voice" class="fa-solid fa-microphone-lines"></i>
+                </button>
+                <button id="btn-open-settings" class="btn-game bg-indigo-600 hover:bg-indigo-500 border-indigo-800 text-white px-3 h-9 rounded-xl shadow-md flex items-center gap-1.5 font-bold text-xs md:text-sm" title="Thiết lập danh sách học sinh & thời gian">
                     <i class="fa-solid fa-sliders"></i>
                     <span class="hidden sm:inline">Cài đặt</span>
                 </button>
             </div>
         </div>
 
-        <!-- BANNER THÔNG BÁO DIỄN BIẾN -->
-        <div id="narrative-banner" class="absolute top-20 left-1/2 -translate-x-1/2 z-10 pointer-events-none transition-all duration-300 opacity-0 scale-95 w-full max-w-3xl px-4 flex justify-center">
-            <div class="bg-gradient-to-r from-amber-50 via-white to-amber-50 px-6 py-2.5 rounded-full shadow-2xl border-4 border-amber-500 flex items-center gap-3">
-                <div id="narrative-icon" class="w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center text-lg shrink-0 shadow">
+        <!-- PHẦN 8: HIỆU ỨNG LÀM TỐI NHẸ NỀN (~18%) KHI CÔNG BỐ HỌC SINH NGỦ QUÊN (phase === 3) -->
+        <div id="reveal-backdrop" class="absolute inset-0 bg-slate-950/20 pointer-events-none transition-opacity duration-300 opacity-0 z-[15]"></div>
+
+        <!-- PHẦN 2: BANNER THÔNG BÁO DIỄN BIẾN THU GỌN (<= 8-10% chiều cao màn hình) -->
+        <div id="narrative-banner" class="absolute top-12 left-1/2 -translate-x-1/2 z-10 pointer-events-none transition-all duration-300 opacity-0 scale-95 w-full max-w-xl px-3 flex justify-center">
+            <div class="bg-gradient-to-r from-amber-50 via-white to-amber-50 px-3 py-1 rounded-full shadow border border-amber-500 flex items-center gap-2 max-h-[38px]">
+                <div id="narrative-icon" class="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-[11px] shrink-0 shadow-sm">
                     <i class="fa-solid fa-wind"></i>
                 </div>
-                <p id="narrative-text" class="font-title text-base md:text-xl font-bold text-slate-800 text-center leading-snug">
+                <p id="narrative-text" class="font-title text-xs md:text-sm font-bold text-slate-800 text-center leading-tight line-clamp-1">
                     "Ôi! Gió to quá! Các em ngồi yên trên thuyền nhé!"
                 </p>
             </div>
         </div>
 
         <!-- HIỂN THỊ NỔI BẬT TÊN HỌC SINH NGỦ QUÊN BỊ GỌI TÊN (HỒI HỘP, BẤT NGỜ) -->
-        <div id="called-spotlight" class="absolute top-36 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden">
-            <div class="animate-pop bg-gradient-to-b from-purple-700 via-indigo-800 to-slate-900 text-white px-9 py-5 rounded-3xl shadow-[0_20px_50px_rgba(88,28,135,0.85)] border-4 border-yellow-300 text-center min-w-[360px]">
+        <div id="called-spotlight" class="absolute top-28 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden">
+            <div id="called-spotlight-card" class="spotlight-dramatic bg-gradient-to-b from-purple-700 via-indigo-800 to-slate-900 text-white px-9 py-5 rounded-3xl shadow-[0_20px_50px_rgba(88,28,135,0.85)] border-4 border-yellow-300 text-center min-w-[360px]">
                 <div class="text-xs md:text-sm uppercase tracking-widest text-yellow-200 font-extrabold mb-1 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-bell animate-bounce text-yellow-300"></i>
                     <span id="spotlight-teacher-title">PHÁT HIỆN HỌC SINH NGỦ QUÊN!</span>
@@ -170,36 +185,71 @@
             </div>
         </div>
 
-        <!-- THANH ĐIỀU KHIỂN CHÍNH Ở ĐÁY MÀN HÌNH -->
-        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 w-full max-w-5xl px-4 pointer-events-none">
-            <div class="bg-slate-900/85 backdrop-blur-md p-2.5 rounded-3xl shadow-2xl border-2 border-slate-600/80 flex flex-wrap items-center justify-center gap-2.5 pointer-events-auto">
+        <!-- PHẦN 6: BẢNG KẾT QUẢ HỌC SINH NGỦ QUÊN REALTIME (BÊN PHẢI) -->
+        <div id="sleeping-board" class="absolute top-16 right-3.5 z-20 w-64 md:w-72 bg-slate-900/90 backdrop-blur-md text-white rounded-2xl shadow-2xl border-2 border-purple-400/90 overflow-hidden hidden animate-pop">
+            <div class="bg-gradient-to-r from-purple-700 to-indigo-700 px-3.5 py-2 border-b border-purple-400/50 flex items-center justify-between">
+                <div class="font-title text-sm md:text-base font-extrabold tracking-wide text-yellow-300 flex items-center gap-1.5">
+                    <span>😴</span>
+                    <span>HỌC SINH NGỦ QUÊN</span>
+                </div>
+                <span id="sleeping-board-count" class="bg-yellow-300 text-purple-950 text-xs font-extrabold px-2 py-0.5 rounded-full">0</span>
+            </div>
+            <ol id="sleeping-board-list" class="p-3 space-y-1.5 max-h-64 overflow-y-auto text-sm md:text-base font-bold text-purple-50">
+                <!-- Cập nhật realtime mỗi khi revealAndCallSleepingStudent() được gọi -->
+            </ol>
+        </div>
+
+        <!-- PHẦN 9: BẢNG TỔNG KẾT KẾT QUẢ KHI KẾT THÚC (gameState.phase === 4) -->
+        <div id="summary-modal" class="absolute inset-0 z-20 flex items-center justify-center p-4 pointer-events-none hidden">
+            <div class="animate-pop pointer-events-auto bg-white/95 backdrop-blur-md rounded-3xl shadow-[0_25px_60px_rgba(15,23,42,0.65)] border-4 border-amber-400 w-full max-w-md overflow-hidden">
+                <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 px-5 py-3 text-white flex items-center justify-between">
+                    <h2 class="font-title text-xl md:text-2xl font-extrabold tracking-wide flex items-center gap-2">
+                        <span>🏁</span>
+                        <span>KẾT QUẢ CHUYẾN ĐÒ</span>
+                    </h2>
+                    <button id="btn-close-summary" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white text-sm transition" title="Thu gọn bảng kết quả">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="p-5 space-y-3.5">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-3 text-center">
+                            <div class="text-xs font-extrabold text-emerald-700 uppercase">✅ Đã vào trường</div>
+                            <div id="summary-school-count" class="font-title text-3xl font-extrabold text-emerald-800 mt-0.5">0</div>
+                        </div>
+                        <div class="bg-purple-50 border-2 border-purple-300 rounded-2xl p-3 text-center">
+                            <div class="text-xs font-extrabold text-purple-700 uppercase">😴 Ngủ quên</div>
+                            <div id="summary-sleeping-count" class="font-title text-3xl font-extrabold text-purple-800 mt-0.5">0</div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-3.5">
+                        <div class="text-xs font-extrabold text-slate-600 uppercase tracking-wider mb-2">Danh sách học sinh ngủ quên:</div>
+                        <ul id="summary-sleeping-list" class="space-y-1.5 max-h-44 overflow-y-auto text-sm md:text-base font-extrabold text-purple-900">
+                            <!-- Render danh sách học sinh ngủ quên -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PHẦN 7: THANH ĐIỀU KHIỂN CHÍNH CÂN ĐỐI Ở ĐÁY MÀN HÌNH -->
+        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 w-full max-w-3xl px-4 pointer-events-none">
+            <div class="bg-slate-900/85 backdrop-blur-md p-2 rounded-2xl shadow-2xl border-2 border-slate-600/80 flex flex-wrap items-center justify-center gap-3 pointer-events-auto">
                 
-                <!-- 1. BẮT ĐẦU HÀNH TRÌNH -->
-                <button id="btn-start" class="btn-game bg-emerald-500 hover:bg-emerald-400 border-emerald-700 text-white px-5 py-2.5 rounded-2xl font-title font-bold text-base md:text-lg flex items-center gap-2 shadow-lg">
-                    <i class="fa-solid fa-play"></i>
-                    <span>BẮT ĐẦU</span>
+                <!-- 1. ĐIỀU KHIỂN CHÍNH: BẮT ĐẦU / TẠM DỪNG / TIẾP TỤC -->
+                <button id="btn-main-control" class="btn-game h-11 min-w-[155px] bg-emerald-500 hover:bg-emerald-400 border-emerald-700 text-white px-5 rounded-xl font-title font-bold text-base flex items-center justify-center gap-2 shadow-md">
+                    <i id="main-control-icon" class="fa-solid fa-play"></i>
+                    <span id="main-control-text">BẮT ĐẦU</span>
                 </button>
 
-                <!-- 2. TẠM DỪNG / TIẾP TỤC -->
-                <button id="btn-pause" class="btn-game bg-amber-500 hover:bg-amber-400 border-amber-700 text-white px-4 py-2.5 rounded-2xl font-title font-bold text-base md:text-lg flex items-center gap-2 shadow-lg" disabled>
-                    <i id="icon-pause" class="fa-solid fa-pause"></i>
-                    <span id="text-pause">TẠM DỪNG</span>
-                </button>
-
-                <!-- 3. CẬP BẾN NGAY (Tua nhanh hết giờ để cập bến) -->
-                <button id="btn-dock" class="btn-game bg-sky-500 hover:bg-sky-400 border-sky-700 text-white px-5 py-2.5 rounded-2xl font-title font-bold text-base md:text-lg flex items-center gap-2 shadow-lg">
+                <!-- 2. CẬP BẾN NGAY -->
+                <button id="btn-dock" class="btn-game h-11 min-w-[185px] bg-sky-500 hover:bg-sky-400 border-sky-700 text-white px-5 rounded-xl font-title font-bold text-base flex items-center justify-center gap-2 shadow-md">
                     <i class="fa-solid fa-anchor"></i>
                     <span>CHO THUYỀN CẬP BẾN</span>
                 </button>
 
-                <!-- 4. GỌI TÊN HỌC SINH NGỦ QUÊN -->
-                <button id="btn-call" class="btn-game bg-purple-600 hover:bg-purple-500 border-purple-800 text-white px-5 py-2.5 rounded-2xl font-title font-bold text-base md:text-lg flex items-center gap-2 shadow-lg">
-                    <i class="fa-solid fa-bullhorn"></i>
-                    <span>GỌI TÊN HS NGỦ QUÊN</span>
-                </button>
-
-                <!-- 5. CHƠI LẠI -->
-                <button id="btn-reset" class="btn-game bg-rose-500 hover:bg-rose-400 border-rose-700 text-white px-4 py-2.5 rounded-2xl font-title font-bold text-base md:text-lg flex items-center gap-2 shadow-lg">
+                <!-- 3. CHƠI LẠI -->
+                <button id="btn-reset" class="btn-game h-11 min-w-[135px] bg-rose-500 hover:bg-rose-400 border-rose-700 text-white px-5 rounded-xl font-title font-bold text-base flex items-center justify-center gap-2 shadow-md">
                     <i class="fa-solid fa-rotate-right"></i>
                     <span>CHƠI LẠI</span>
                 </button>
@@ -216,7 +266,7 @@
                         <i class="fa-solid fa-chalkboard-user text-2xl text-yellow-300"></i>
                         <div>
                             <h2 class="font-title text-2xl font-extrabold leading-none">THIẾT LẬP TRÒ CHƠI NGƯỜI LÁI ĐÒ</h2>
-                            <p class="text-xs text-indigo-100 mt-0.5">Hết thời gian thuyền tự cập bến, học sinh thức sẽ vào trường, chỉ học sinh ngủ quên mới bị gọi tên!</p>
+                            <p class="text-xs text-indigo-100 mt-0.5">Hết thời gian thuyền tự cập bến, học sinh thức sẽ vào trường, chỉ học sinh ngủ quên mới bị gọi tên! (Giới hạn 1 - 100 HS)</p>
                         </div>
                     </div>
                     <button id="btn-close-settings" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white text-lg transition">
@@ -232,22 +282,14 @@
                         <div class="flex justify-between items-center mb-2">
                             <label class="font-bold text-slate-700 text-sm flex items-center gap-2">
                                 <i class="fa-solid fa-list-ol text-indigo-600"></i>
-                                Danh sách học sinh (Mỗi dòng 1 tên):
+                                Danh sách học sinh (1 - 100 HS, mỗi dòng 1 tên):
                             </label>
-                            <span id="student-count-badge" class="bg-indigo-100 text-indigo-800 text-xs font-extrabold px-2.5 py-1 rounded-full">12 học sinh</span>
+                            <span id="student-count-badge" class="bg-indigo-100 text-indigo-800 text-xs font-extrabold px-2.5 py-1 rounded-full">0 / 100 học sinh</span>
                         </div>
-                        <textarea id="input-student-list" rows="10" class="w-full flex-1 p-3.5 rounded-2xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none font-bold text-slate-700 text-sm leading-relaxed resize-none shadow-inner" placeholder="Nhập tên học sinh, mỗi dòng 1 em..."></textarea>
-                        <div class="flex gap-2 mt-2.5">
-                            <button id="btn-sample-10" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl border border-slate-300 transition">
-                                Mẫu 10 HS
-                            </button>
-                            <button id="btn-sample-16" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl border border-slate-300 transition">
-                                Mẫu 16 HS
-                            </button>
-                            <button id="btn-sample-24" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl border border-slate-300 transition">
-                                Mẫu 24 HS
-                            </button>
-                        </div>
+                        <textarea id="input-student-list" rows="10" class="w-full flex-1 p-3.5 rounded-2xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none font-bold text-slate-700 text-sm leading-relaxed resize-none shadow-inner" placeholder="Nhập danh sách học sinh (tối đa 100), mỗi dòng một tên...&#10;&#10;Ví dụ:&#10;Nguyễn Văn An&#10;Trần Minh Khôi&#10;Lê Khánh Ngọc"></textarea>
+                        <p id="student-limit-note" class="text-[11px] font-bold text-slate-500 mt-1.5">
+                            Tối thiểu 1 học sinh, tối đa 100 học sinh. Danh sách sẽ được ghi nhớ sau khi bấm Lưu &amp; Áp dụng.
+                        </p>
                     </div>
 
                     <!-- Cột phải: Chọn Thời gian, Giáo viên & Cấu hình học sinh ngủ quên (6 cột) -->
@@ -282,7 +324,7 @@
                                         <div class="w-9 h-9 rounded-full bg-pink-500 text-white flex items-center justify-center text-base font-bold">Cô</div>
                                         <div>
                                             <div class="font-extrabold text-slate-800 text-sm">Cô Giáo</div>
-                                            <div class="text-[11px] text-slate-500">Áo dài & Nón lá</div>
+                                            <div class="text-[11px] text-slate-500">Áo dài &amp; Nón lá</div>
                                         </div>
                                     </div>
                                 </label>
@@ -292,7 +334,7 @@
                                         <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-base font-bold">Thầy</div>
                                         <div>
                                             <div class="font-extrabold text-slate-800 text-sm">Thầy Giáo</div>
-                                            <div class="text-[11px] text-slate-500">Áo sơ mi & Nón lá</div>
+                                            <div class="text-[11px] text-slate-500">Áo sơ mi &amp; Nón lá</div>
                                         </div>
                                     </div>
                                 </label>
@@ -323,8 +365,8 @@
                             <!-- Thiết lập số lượng gọi ngẫu nhiên -->
                             <div id="random-config-box" class="space-y-2">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-xs font-bold text-slate-700">Số học sinh ngủ quên bị gọi tên:</span>
-                                    <input id="input-call-count" type="number" min="1" max="30" value="2" class="w-20 px-3 py-1 rounded-xl border-2 border-purple-400 font-extrabold text-center text-purple-900 text-base">
+                                    <span class="text-xs font-bold text-slate-700">Số học sinh ngủ quên bị gọi tên (1 - 100):</span>
+                                    <input id="input-call-count" type="number" min="1" max="100" value="2" class="w-20 px-3 py-1 rounded-xl border-2 border-purple-400 font-extrabold text-center text-purple-900 text-base">
                                 </div>
                                 <div class="flex flex-wrap gap-1.5 pt-1">
                                     <button type="button" data-count="1" class="quick-count-btn px-3 py-1 rounded-lg bg-white border border-purple-300 hover:bg-purple-200 text-xs font-bold text-purple-800">1 HS</button>
@@ -357,7 +399,7 @@
                     </div>
                     <div class="flex gap-3">
                         <button id="btn-save-settings" class="btn-game bg-indigo-600 hover:bg-indigo-500 border-indigo-800 text-white px-6 py-2 rounded-xl font-title font-bold text-base shadow-md">
-                            <i class="fa-solid fa-check mr-1.5"></i> LƯU & ÁP DỤNG
+                            <i class="fa-solid fa-check mr-1.5"></i> LƯU &amp; ÁP DỤNG
                         </button>
                     </div>
                 </div>
@@ -368,35 +410,48 @@
 </div>
 
 <script>
-/**
- * ============================================================================
- * TRÒ CHƠI GIÁO DỤC: NGƯỜI LÁI ĐÒ
- * Diễn biến kịch tính & hồi hộp:
- * 1. Giáo viên chọn thời gian chơi (10s, 15s, 20s, 30s...).
- * 2. Bấm BẮT ĐẦU: Con thuyền di chuyển xuyên qua 4 phân cảnh làng quê (Bến Đò Làng -> Khúc Sông Gió Lớn -> Vượt Sóng Dữ -> Bến Trường Học).
- * 3. Trong lúc sóng gió chòng chành, một số học sinh lén gật gù.
- * 4. Hết thời gian: Thuyền tự động cập bến trường học!
- *    - Các học sinh tỉnh táo tự động đứng dậy, đi bộ xuống thuyền vào cổng trường.
- *    - Những học sinh ngủ quên vẫn nằm ngủ say trên thuyền (Zzz) -> Thầy/Cô giáo lần lượt GỌI TÊN từng em trong sự bất ngờ, hồi hộp của cả lớp!
- * ============================================================================
- */
-
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Danh sách học sinh mặc định
-const DEFAULT_STUDENTS = [
-    "Minh Anh", "Bảo Ngọc", "Gia Huy", "Tuấn Kiệt",
-    "Hà My", "Đăng Khoa", "Thảo Nhi", "Hoàng Nam",
-    "Khánh Linh", "Đức Duy", "Phương Thảo", "Quốc Bảo"
-];
+const MIN_STUDENTS = 1;
+const MAX_STUDENTS = 100;
+const STORAGE_KEY_STUDENTS = 'nguoilaido_saved_students_v1';
 
-// Bảng màu áo đồng phục/áo học sinh tươi sáng
 const SHIRT_COLORS = [
     "#ef4444", "#f97316", "#eab308", "#22c55e",
     "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899",
     "#14b8a6", "#f43f5e", "#6366f1", "#84cc16"
 ];
+
+function clampStudentCount(val, fallback = 1) {
+    const n = parseInt(val, 10);
+    if (isNaN(n)) return fallback;
+    return Math.min(MAX_STUDENTS, Math.max(MIN_STUDENTS, n));
+}
+
+function loadSavedStudentsFromStorage() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY_STUDENTS);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return null;
+        return parsed
+            .map(s => String(s || '').trim())
+            .filter(s => s.length > 0)
+            .slice(0, MAX_STUDENTS);
+    } catch (e) {
+        console.warn("Không thể đọc danh sách học sinh từ localStorage:", e);
+        return null;
+    }
+}
+
+function saveStudentsToStorage(names) {
+    try {
+        localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(names.slice(0, MAX_STUDENTS)));
+    } catch (e) {
+        console.warn("Không thể lưu danh sách học sinh vào localStorage:", e);
+    }
+}
 
 // ============================================================================
 // HỆ THỐNG ÂM THANH (WEB AUDIO API SYNTHESIZER)
@@ -482,7 +537,6 @@ class SoundSystem {
         }
     }
 
-    // Âm thanh trống hồi hộp (Drumroll tick) trước khi công bố tên học sinh ngủ quên
     playSuspenseTick(pitch = 220) {
         if (!this.enabled) return;
         this.init();
@@ -499,12 +553,11 @@ class SoundSystem {
         osc.stop(now + 0.09);
     }
 
-    // Hiệu ứng công bố gọi tên học sinh ngủ quên đầy kịch tính
     playCallAndSleep() {
         if (!this.enabled) return;
         this.init();
         const now = this.ctx.currentTime;
-        const notes = [587.33, 659.25, 783.99, 1046.50]; // D5 -> E5 -> G5 -> C6
+        const notes = [587.33, 659.25, 783.99, 1046.50];
         notes.forEach((freq, idx) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
@@ -519,7 +572,6 @@ class SoundSystem {
         });
     }
 
-    // Tiếng bước chân vui nhộn khi học sinh bước xuống thuyền
     playStepSound() {
         if (!this.enabled) return;
         this.init();
@@ -536,7 +588,6 @@ class SoundSystem {
         osc.stop(now + 0.09);
     }
 
-    // Nhạc chuông hoàn thành
     playVictoryFanfare() {
         if (!this.enabled) return;
         this.init();
@@ -562,59 +613,49 @@ const sound = new SoundSystem();
 // ============================================================================
 // QUẢN LÝ TRẠNG THÁI TRÒ CHƠI & HÀNH TRÌNH QUA CÁC PHÂN CẢNH
 // ============================================================================
-const TOTAL_CAMERA_DISTANCE = 3200; // Tổng chiều dài cuộn cảnh qua 4 phân cảnh trước khi tới trường
+const TOTAL_CAMERA_DISTANCE = 3200;
 
 const gameState = {
-    // 0: Chuẩn bị tại Bến Đò Làng
-    // 1: Hành trình vượt qua các phân cảnh theo thời gian đếm ngược
-    // 2: Thuyền tự động cập bến & Học sinh tỉnh táo đi vào trường
-    // 3: Cao trào hồi hộp: Lần lượt gọi tên các học sinh ngủ quên trên thuyền
-    // 4: Hoàn thành chuyến đò
     phase: 0,
     paused: false,
     time: 0,
 
-    // Cấu hình thời gian hành trình
-    totalDuration: 20,    // Mặc định 20 giây
+    totalDuration: 20,
     remainingTime: 20,
     lastFrameTimestamp: 0,
-    journeyProgress: 0,   // 0.0 -> 1.0
-    cameraX: 0,           // Tọa độ camera cuộn qua các phân cảnh (0 -> 3200)
-    currentSceneIndex: 1, // Phân cảnh 1, 2, 3, 4
+    journeyProgress: 0,
+    cameraX: 0,
+    currentSceneIndex: 1,
 
     teacherGender: 'female',
     callMode: 'random',
     callCount: 2,
     manualSelectedIndices: new Set(),
 
-    // Thông số thời tiết & môi trường thay đổi theo phân cảnh
     windIntensity: 0.15,
     targetWindIntensity: 0.15,
     skyDarkness: 0,
     targetSkyDarkness: 0,
 
-    // Thông số con thuyền
     boat: {
-        x: 380,          // Khi đang đi qua các phân cảnh, thuyền ở vị trí trung tâm trái, khi gần đích sẽ tiến sang phải vào bến
+        x: 380,
         baseY: 590,
         y: 590,
-        dockX: 980,      // Vị trí mũi thuyền chạm bến trường học ở phân cảnh cuối
+        dockX: 980,
         angle: 0,
         oarAngle: 0
     },
 
-    // Bong bóng thoại của giáo viên trên Canvas
     teacherBubble: {
         visible: false,
         text: "",
         timer: 0
     },
 
-    // Dữ liệu học sinh độc lập
-    studentNames: [...DEFAULT_STUDENTS],
+    studentNames: [],
+    hasSavedList: false,
     students: [],
 
-    // Hàng đợi gọi tên học sinh ngủ quên
     callQueue: [],
     callTimer: 0,
     suspenseTicks: 0,
@@ -624,6 +665,7 @@ const gameState = {
 const clouds = [];
 const leaves = [];
 const zzzParticles = [];
+const wakeTrails = [];
 
 function initEnvironment() {
     clouds.length = 0;
@@ -651,9 +693,6 @@ function initEnvironment() {
     }
 }
 
-/**
- * Khởi tạo danh sách học sinh ngồi trên thuyền
- */
 function buildStudentsData() {
     gameState.students = [];
     zzzParticles.length = 0;
@@ -681,12 +720,10 @@ function buildStudentsData() {
             seatOffsetY: seatOffsetY,
             labelTier: labelTier,
 
-            // willFallAsleep: Học sinh sẽ ngủ quên khi thuyền cập bến
-            // called: Đã được thầy/cô chính thức gọi tên công bố
             willFallAsleep: false,
             called: false,
-            drowsy: false, // Hiệu ứng chợp mắt đánh lừa hồi hộp giữa đường
-            state: 'sitting', // 'sitting' | 'sleeping' | 'standing' | 'walking' | 'in_school'
+            drowsy: false,
+            state: 'sitting',
 
             worldX: 0,
             worldY: 0,
@@ -701,10 +738,6 @@ function buildStudentsData() {
     updateTimerDisplayUI();
 }
 
-// ============================================================================
-// CẬP NHẬT GIAO DIỆN & CÁC GIAI ĐOẠN HÀNH TRÌNH
-// ============================================================================
-
 function formatSeconds(sec) {
     const s = Math.max(0, Math.ceil(sec));
     const mins = Math.floor(s / 60);
@@ -714,6 +747,71 @@ function formatSeconds(sec) {
 
 function updateTimerDisplayUI() {
     document.getElementById('timer-display').textContent = formatSeconds(gameState.remainingTime);
+}
+
+const narration = {
+    enabled: true,
+    supported: 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window,
+    queue: [],
+    speaking: false,
+    generation: 0,
+    voices: [],
+    refreshVoices() {
+        if (this.supported) this.voices = window.speechSynthesis.getVoices();
+    },
+    chooseVoice() {
+        const vietnamese = this.voices.filter(v => /^vi(?:-|$)/i.test(v.lang));
+        const preference = gameState.teacherGender === 'male'
+            ? /male|nam|man|minh|an/i : /female|nữ|woman|linh|hoai|mai/i;
+        return vietnamese.find(v => preference.test(v.name)) || vietnamese[0] || null;
+    },
+    say(text) {
+        if (!this.enabled || !this.supported || !text || gameState.paused) return;
+        this.queue.push(text.replace(/[“”"']/g, '').trim());
+        this.next();
+    },
+    next() {
+        if (!this.enabled || !this.supported || this.speaking || gameState.paused || !this.queue.length) return;
+        const text = this.queue.shift();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'vi-VN';
+        utterance.rate = 1.15;
+        const voice = this.chooseVoice();
+        if (voice) utterance.voice = voice;
+        const generation = this.generation;
+        this.speaking = true;
+        const done = () => {
+            if (generation !== this.generation) return;
+            this.speaking = false;
+            this.next();
+        };
+        utterance.onend = done;
+        utterance.onerror = done;
+        window.speechSynthesis.speak(utterance);
+    },
+    pause() {
+        if (this.supported) window.speechSynthesis.pause();
+    },
+    resume() {
+        if (!this.supported || !this.enabled) return;
+        window.speechSynthesis.resume();
+        this.next();
+    },
+    stop() {
+        this.generation++;
+        this.queue.length = 0;
+        this.speaking = false;
+        if (this.supported) window.speechSynthesis.cancel();
+    },
+    toggle() {
+        this.enabled = !this.enabled;
+        if (!this.enabled) this.stop();
+        return this.enabled;
+    }
+};
+narration.refreshVoices();
+if (narration.supported) {
+    window.speechSynthesis.addEventListener?.('voiceschanged', () => narration.refreshVoices());
 }
 
 function showNarrative(text, iconClass = "fa-wind") {
@@ -735,6 +833,7 @@ function setTeacherSpeech(text, duration = 220) {
     gameState.teacherBubble.visible = true;
     gameState.teacherBubble.text = text;
     gameState.teacherBubble.timer = duration;
+    narration.say(text);
 }
 
 function updateStatisticsUI() {
@@ -748,10 +847,6 @@ function updateStatisticsUI() {
     document.getElementById('stat-school').textContent = inSchool;
 }
 
-/**
- * Chọn bí mật những học sinh sẽ ngủ quên trên chuyến đò
- * Để tạo sự bất ngờ và hồi hộp cho đến khi thuyền cập bến!
- */
 function selectSecretSleepingStudents() {
     gameState.students.forEach(s => {
         s.willFallAsleep = false;
@@ -767,7 +862,8 @@ function selectSecretSleepingStudents() {
             }
         });
     } else {
-        const count = Math.min(gameState.callCount, gameState.students.length);
+        const boundedCallCount = clampStudentCount(gameState.callCount, 1);
+        const count = Math.min(boundedCallCount, gameState.students.length);
         const shuffled = [...gameState.students].sort(() => Math.random() - 0.5);
         for (let i = 0; i < count; i++) {
             shuffled[i].willFallAsleep = true;
@@ -775,8 +871,41 @@ function selectSecretSleepingStudents() {
     }
 }
 
-// BẮT ĐẦU HÀNH TRÌNH ĐẾM NGƯỢC QUA CÁC PHÂN CẢNH
+function updateMainControlButton() {
+    const button = document.getElementById('btn-main-control');
+    const icon = document.getElementById('main-control-icon');
+    const label = document.getElementById('main-control-text');
+    let text, iconName, color, disabled;
+
+    if (gameState.phase === 0) {
+        [text, iconName, color, disabled] = ['BẮT ĐẦU', 'fa-play', 'emerald', false];
+    } else if (gameState.phase === 1 && gameState.paused) {
+        [text, iconName, color, disabled] = ['TIẾP TỤC', 'fa-play', 'emerald', false];
+    } else if (gameState.phase === 1) {
+        [text, iconName, color, disabled] = ['TẠM DỪNG', 'fa-pause', 'amber', false];
+    } else if (gameState.phase === 2 || gameState.phase === 3) {
+        [text, iconName, color, disabled] = ['ĐANG CÔNG BỐ', 'fa-hourglass-half', 'slate', true];
+    } else {
+        [text, iconName, color, disabled] = ['HOÀN THÀNH', 'fa-flag-checkered', 'emerald', true];
+    }
+
+    const colors = {
+        emerald: ['bg-emerald-500', 'hover:bg-emerald-400', 'border-emerald-700'],
+        amber: ['bg-amber-500', 'hover:bg-amber-400', 'border-amber-700'],
+        slate: ['bg-slate-500', 'hover:bg-slate-400', 'border-slate-700']
+    };
+    Object.values(colors).flat().forEach(cls => button.classList.remove(cls));
+    button.classList.add(...colors[color]);
+    button.disabled = disabled;
+    icon.className = `fa-solid ${iconName}`;
+    label.textContent = text;
+}
+
 function startJourney() {
+    if (gameState.studentNames.length === 0) {
+        openSettingsModal();
+        return;
+    }
     if (gameState.phase >= 2) {
         resetGame();
     }
@@ -792,8 +921,7 @@ function startJourney() {
     gameState.currentSceneIndex = 1;
     gameState.lastFrameTimestamp = performance.now();
 
-    updatePauseButtonUI();
-    document.getElementById('btn-pause').disabled = false;
+    updateMainControlButton();
 
     setPhaseBadge("Đang đưa học sinh qua sông");
     showNarrative("Con thuyền bắt đầu rời bến đò làng... Hãy xem ai giữ được tỉnh táo đến khi tới trường nhé!", "fa-sailboat");
@@ -803,19 +931,21 @@ function startJourney() {
     updateStatisticsUI();
 }
 
-// KHI HẾT THỜI GIAN HOẶC BẤM NÚT "CHO THUYỀN CẬP BẾN"
 function triggerAutoDockAndDisembark() {
+    if (gameState.phase >= 2) return;
+    if (gameState.studentNames.length === 0) {
+        openSettingsModal();
+        return;
+    }
+    document.getElementById('btn-dock').disabled = true;
     sound.init();
     if (gameState.phase === 0) {
         selectSecretSleepingStudents();
     }
 
     gameState.paused = false;
-    updatePauseButtonUI();
-    document.getElementById('btn-pause').disabled = false;
-
-    // Đưa thuyền và camera tới thẳng bến trường học (Phân cảnh 4)
     gameState.phase = 2;
+    updateMainControlButton();
     gameState.remainingTime = 0;
     gameState.journeyProgress = 1.0;
     gameState.cameraX = TOTAL_CAMERA_DISTANCE;
@@ -829,9 +959,6 @@ function triggerAutoDockAndDisembark() {
     showNarrative("Thuyền đã cập bến! Các em học sinh đang lần lượt bước xuống thuyền đi vào lớp...", "fa-school");
     setTeacherSpeech("Thuyền cập bến rồi! Các em lần lượt đi vào lớp nhé!", 240);
 
-    // PHÂN LOẠI TRẠNG THÁI:
-    // 1. Học sinh ngủ quên (willFallAsleep === true): Vẫn ngồi ngủ trên thuyền, chờ tất cả các bạn khác vào hết trường mới công bố và gọi tên!
-    // 2. Học sinh không ngủ quên (willFallAsleep === false): Lần lượt đứng dậy và đi bộ vào cổng trường!
     gameState.students.forEach(s => {
         s.drowsy = false;
         if (s.willFallAsleep) {
@@ -849,45 +976,57 @@ function triggerAutoDockAndDisembark() {
         student.walkProgress = 0;
     });
 
-    // Chuẩn bị danh sách các bạn ngủ quên nhưng CHƯA GỌI NGAY (chờ các bạn kia vào hết lớp ở phase 3 mới gọi)
     const sleepingStudents = gameState.students.filter(s => s.willFallAsleep);
     gameState.callQueue = sleepingStudents.map(s => s.id);
     gameState.callTimer = 95;
     gameState.suspenseTicks = 0;
 }
 
-// Bắt đầu hoặc gọi thêm học sinh ngủ quên khi bấm nút "GỌI TÊN HS NGỦ QUÊN"
-function manualCallSleepingStudentButton() {
-    sound.init();
-    if (gameState.phase < 2) {
-        triggerAutoDockAndDisembark();
-        return;
-    }
+function appendSleepingBoardItem(studentName) {
+    const board = document.getElementById('sleeping-board');
+    const listEl = document.getElementById('sleeping-board-list');
+    const countEl = document.getElementById('sleeping-board-count');
+    if (!board || !listEl || !countEl) return;
 
-    // Nếu giáo viên chủ động bấm nút GỌI TÊN khi đang ở bến thì chuyển sang giai đoạn gọi tên ngay
-    if (gameState.phase === 2) {
-        gameState.phase = 3;
-    }
-
-    if (gameState.callQueue.length > 0) {
-        gameState.callTimer = 5;
-    } else {
-        const alreadySleeping = gameState.students.filter(s => s.state === 'sleeping' && !s.called);
-        if (alreadySleeping.length > 0) {
-            gameState.callQueue = alreadySleeping.map(s => s.id);
-            gameState.callTimer = 5;
-        } else {
-            const allSleeping = gameState.students.filter(s => s.called);
-            if (allSleeping.length > 0) {
-                const names = allSleeping.map(s => s.name).join(", ");
-                showNarrative(`Các bạn ngủ quên trên thuyền đã bị gọi tên: ${names}!`, "fa-bullhorn");
-                sound.playCallAndSleep();
-            }
-        }
-    }
+    board.classList.remove('hidden');
+    const index = listEl.children.length + 1;
+    const li = document.createElement('li');
+    li.className = "animate-pop bg-white/10 border border-purple-300/30 rounded-xl px-3 py-1.5 flex items-center gap-2";
+    li.innerHTML = `<span class="text-yellow-300 font-extrabold">${index}.</span><span class="truncate">${studentName}</span>`;
+    listEl.appendChild(li);
+    listEl.scrollTop = listEl.scrollHeight;
+    countEl.textContent = String(index);
 }
 
-// Thực thi gọi tên 1 học sinh đang ngủ quên trên thuyền (Hồi hộp & Bất ngờ)
+function renderEndSummaryModal(sleepingNames) {
+    const modal = document.getElementById('summary-modal');
+    const schoolEl = document.getElementById('summary-school-count');
+    const sleepingCountEl = document.getElementById('summary-sleeping-count');
+    const listEl = document.getElementById('summary-sleeping-list');
+    if (!modal || !schoolEl || !sleepingCountEl || !listEl) return;
+
+    const inSchoolCount = gameState.students.filter(s => s.state === 'in_school').length;
+    schoolEl.textContent = String(inSchoolCount);
+    sleepingCountEl.textContent = String(sleepingNames.length);
+
+    listEl.innerHTML = '';
+    if (sleepingNames.length === 0) {
+        const li = document.createElement('li');
+        li.className = "text-emerald-700 font-bold text-sm";
+        li.textContent = "🎉 Không có học sinh nào ngủ quên!";
+        listEl.appendChild(li);
+    } else {
+        sleepingNames.forEach((name, idx) => {
+            const li = document.createElement('li');
+            li.className = "bg-purple-50 border border-purple-200 rounded-xl px-3 py-1.5 flex items-center gap-2";
+            li.innerHTML = `<span class="text-purple-600 font-extrabold">${idx + 1}.</span><span>${name}</span>`;
+            listEl.appendChild(li);
+        });
+    }
+
+    modal.classList.remove('hidden');
+}
+
 function revealAndCallSleepingStudent(studentId) {
     const student = gameState.students.find(s => s.id === studentId);
     if (!student) return;
@@ -899,7 +1038,6 @@ function revealAndCallSleepingStudent(studentId) {
     const teacherTitle = gameState.teacherGender === 'female' ? "Cô giáo" : "Thầy giáo";
     setTeacherSpeech(`Ơ kìa! Em ${student.name} ngủ quên trên thuyền rồi!`, 160);
 
-    // Hiển thị Spotlight bất ngờ giữa màn hình
     const spotlight = document.getElementById('called-spotlight');
     document.getElementById('spotlight-teacher-title').textContent =
         "PHÁT HIỆN HỌC SINH NGỦ QUÊN!";
@@ -907,12 +1045,19 @@ function revealAndCallSleepingStudent(studentId) {
     document.getElementById('spotlight-subtext').innerHTML =
         `<i class="fa-solid fa-bullhorn mr-1 text-amber-300"></i> ${teacherTitle} gọi tên vì vẫn đang say giấc trên thuyền (Zzz...)`;
 
+    const spotlightCard = document.getElementById('called-spotlight-card');
     spotlight.classList.remove('hidden');
+    if (spotlightCard) {
+        spotlightCard.classList.remove('spotlight-dramatic');
+        void spotlightCard.offsetWidth;
+        spotlightCard.classList.add('spotlight-dramatic');
+    }
     clearTimeout(window.spotlightTimeout);
     window.spotlightTimeout = setTimeout(() => {
         spotlight.classList.add('hidden');
     }, 2800);
 
+    appendSleepingBoardItem(student.name);
     sound.playCallAndSleep();
     updateStatisticsUI();
 }
@@ -921,6 +1066,13 @@ function finishGamePhase4() {
     if (gameState.completionAnnounced) return;
     gameState.completionAnnounced = true;
     gameState.phase = 4;
+    updateMainControlButton();
+
+    const backdrop = document.getElementById('reveal-backdrop');
+    if (backdrop) {
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0');
+    }
 
     const sleepingNames = gameState.students.filter(s => s.called).map(s => s.name);
     const sleepingText = sleepingNames.length > 0
@@ -932,11 +1084,13 @@ function finishGamePhase4() {
         `"Chuyến đò đã cập bến! Các em chăm ngoan đã vào trường an toàn. ${sleepingText}"`,
         "fa-flag-checkered"
     );
+    renderEndSummaryModal(sleepingNames);
     setTeacherSpeech("Các bạn thức đã vào lớp. Mấy bạn ngủ quên mau tỉnh dậy nào!", 400);
     sound.playVictoryFanfare();
 }
 
 function resetGame() {
+    narration.stop();
     gameState.phase = 0;
     gameState.paused = false;
     gameState.completionAnnounced = false;
@@ -957,8 +1111,24 @@ function resetGame() {
 
     document.getElementById('called-spotlight').classList.add('hidden');
     document.getElementById('narrative-banner').classList.add('opacity-0', 'scale-95');
-    document.getElementById('btn-pause').disabled = true;
-    updatePauseButtonUI();
+    document.getElementById('btn-dock').disabled = false;
+
+    const backdrop = document.getElementById('reveal-backdrop');
+    if (backdrop) {
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0');
+    }
+    const sleepingBoard = document.getElementById('sleeping-board');
+    const sleepingBoardList = document.getElementById('sleeping-board-list');
+    const sleepingBoardCount = document.getElementById('sleeping-board-count');
+    if (sleepingBoard) sleepingBoard.classList.add('hidden');
+    if (sleepingBoardList) sleepingBoardList.innerHTML = '';
+    if (sleepingBoardCount) sleepingBoardCount.textContent = '0';
+
+    const summaryModal = document.getElementById('summary-modal');
+    if (summaryModal) summaryModal.classList.add('hidden');
+
+    updateMainControlButton();
 
     setPhaseBadge("Bến Đò Làng (Chuẩn bị)");
     sound.stopWindAmbience();
@@ -977,7 +1147,6 @@ function updateGame(now) {
 
     gameState.time += 1;
 
-    // XỬ LÝ HÀNH TRÌNH ĐẾM NGƯỢC QUA 4 PHÂN CẢNH (PHASE 1)
     if (gameState.phase === 1) {
         gameState.remainingTime -= dt;
         if (gameState.remainingTime <= 0) {
@@ -988,13 +1157,9 @@ function updateGame(now) {
 
         gameState.journeyProgress = 1 - (gameState.remainingTime / gameState.totalDuration);
         const p = gameState.journeyProgress;
-
-        // Cuộn camera xuyên qua thế giới 4 phân cảnh (0 -> 3200px)
         gameState.cameraX = p * TOTAL_CAMERA_DISTANCE;
 
-        // Diễn biến 4 phân cảnh theo tiến độ thời gian:
         if (p < 0.25) {
-            // Phân cảnh 1: Rời Bến Đò Làng - Trời bắt đầu nổi gió
             if (gameState.currentSceneIndex !== 1) {
                 gameState.currentSceneIndex = 1;
             }
@@ -1002,7 +1167,6 @@ function updateGame(now) {
             gameState.targetSkyDarkness = 0.25;
             gameState.boat.x = 380 + (p / 0.25) * 60;
         } else if (p < 0.60) {
-            // Phân cảnh 2: Khúc Sông Gió Lớn - Mây đen kéo tới, gió thổi nghiêng cây
             if (gameState.currentSceneIndex !== 2) {
                 gameState.currentSceneIndex = 2;
                 setPhaseBadge("Trời nổi gió lớn");
@@ -1014,14 +1178,12 @@ function updateGame(now) {
             gameState.targetSkyDarkness = 0.72;
             gameState.boat.x = 440 + ((p - 0.25) / 0.35) * 80;
 
-            // Hiệu ứng đánh lừa hồi hộp: ngẫu nhiên vài bạn chợp mắt gật gù nhẹ trong gió bão
             if (gameState.time % 35 === 0) {
                 gameState.students.forEach(s => {
                     s.drowsy = Math.random() < 0.28;
                 });
             }
         } else if (p < 0.85) {
-            // Phân cảnh 3: Vượt Sóng Dữ Qua Hẻm Núi
             if (gameState.currentSceneIndex !== 3) {
                 gameState.currentSceneIndex = 3;
                 setPhaseBadge("Vượt sóng dữ");
@@ -1040,7 +1202,6 @@ function updateGame(now) {
                 });
             }
         } else {
-            // Phân cảnh 4: Tiến Về Bến Trường Học
             if (gameState.currentSceneIndex !== 4) {
                 gameState.currentSceneIndex = 4;
                 setPhaseBadge("Sắp tới bến trường");
@@ -1050,7 +1211,6 @@ function updateGame(now) {
             }
             gameState.targetWindIntensity = 0.4;
             gameState.targetSkyDarkness = 0.15;
-            // Con thuyền lướt từ x=660 tới sát cầu cảng dockX=980
             const localT = (p - 0.85) / 0.15;
             gameState.boat.x = 660 + localT * (gameState.boat.dockX - 660);
         }
@@ -1058,17 +1218,14 @@ function updateGame(now) {
         updateTimerDisplayUI();
     }
 
-    // Chuyển đổi mượt mà cường độ gió và độ tối bầu trời
     gameState.windIntensity += (gameState.targetWindIntensity - gameState.windIntensity) * 0.04;
     gameState.skyDarkness += (gameState.targetSkyDarkness - gameState.skyDarkness) * 0.03;
 
-    // 1. Cập nhật Mây trôi
     clouds.forEach(c => {
-        c.x -= c.speed * (1 + gameState.windIntensity * 4.5);
+        c.x -= c.speed * (0.45 + gameState.windIntensity * 0.85);
         if (c.x < -250) c.x = 1750;
     });
 
-    // 2. Cập nhật Lá bay theo gió
     leaves.forEach(l => {
         l.x += l.speedX * (0.5 + gameState.windIntensity * 2.8);
         l.y += l.speedY + Math.sin(gameState.time * 0.05 + l.x * 0.01) * 1.2;
@@ -1084,7 +1241,6 @@ function updateGame(now) {
         }
     });
 
-    // 3. Cập nhật Bong bóng thoại của Giáo viên
     if (gameState.teacherBubble.visible) {
         gameState.teacherBubble.timer--;
         if (gameState.teacherBubble.timer <= 0) {
@@ -1092,9 +1248,8 @@ function updateGame(now) {
         }
     }
 
-    // 4. Cập nhật độ nghiêng và nhịp chèo của Con thuyền
-    const waveRockAmplitude = 0.02 + gameState.windIntensity * 0.085;
-    const waveRockSpeed = 0.05 + gameState.windIntensity * 0.04;
+    const waveRockAmplitude = 0.011 + gameState.windIntensity * 0.044;
+    const waveRockSpeed = 0.045 + gameState.windIntensity * 0.025;
 
     if (gameState.phase === 1) {
         gameState.boat.oarAngle = Math.sin(gameState.time * 0.16) * 0.58;
@@ -1106,27 +1261,42 @@ function updateGame(now) {
 
     const rockFactor = gameState.phase >= 2 ? 0.18 : 1.0;
     gameState.boat.angle = Math.sin(gameState.time * waveRockSpeed) * waveRockAmplitude * rockFactor;
-    gameState.boat.y = gameState.boat.baseY + Math.cos(gameState.time * waveRockSpeed * 1.2) * (4 + gameState.windIntensity * 14) * rockFactor;
+    gameState.boat.y = gameState.boat.baseY + Math.cos(gameState.time * waveRockSpeed * 1.2) * (2.5 + gameState.windIntensity * 7.5) * rockFactor;
 
-    // 5. Cập nhật từng Học sinh & Quá trình đi bộ vào trường
+    if (gameState.phase === 1 && gameState.time % 5 === 0) {
+        wakeTrails.push({
+            x: gameState.boat.x - 245,
+            y: gameState.boat.y + 38,
+            rx: 18,
+            ry: 5,
+            alpha: 0.42
+        });
+    }
+    for (let i = wakeTrails.length - 1; i >= 0; i--) {
+        const w = wakeTrails[i];
+        w.x -= 1.6 + gameState.windIntensity * 1.2;
+        w.rx += 0.45;
+        w.ry += 0.12;
+        w.alpha -= 0.008;
+        if (w.alpha <= 0) wakeTrails.splice(i, 1);
+    }
+
     let allAwakeInSchool = true;
 
     gameState.students.forEach(s => {
         if (s.state === 'sleeping') {
-            // HỌC SINH NGỦ QUÊN -> Nằm ngủ trên thuyền, có chữ Zzz bay lên
             s.headNodPhase += 0.06;
-            if (gameState.time % 34 === (s.id * 7) % 34) {
+            if (gameState.time % 20 === (s.id * 5) % 20) {
                 const pos = getStudentBoatWorldPos(s);
                 zzzParticles.push({
                     x: pos.x + 5,
                     y: pos.y - 38,
                     alpha: 1.0,
-                    scale: 0.72,
+                    scale: 0.92,
                     drift: (Math.random() - 0.5) * 0.6
                 });
             }
         } else if (gameState.phase >= 2 && !s.willFallAsleep) {
-            // HỌC SINH TỈNH TÁO -> Tự động bước xuống thuyền và đi vào trường học
             if (s.state === 'standing') {
                 allAwakeInSchool = false;
                 s.walkDelay--;
@@ -1162,32 +1332,33 @@ function updateGame(now) {
         }
     });
 
-    // KHI TẤT CẢ HỌC SINH TỈNH TÁO ĐÃ VÀO HẾT TRONG TRƯỜNG (allAwakeInSchool === true):
-    // Bắt đầu chuyển sang Giai đoạn 3 để thong thả, hồi hộp gọi tên từng bạn ngủ quên trên thuyền!
     if (gameState.phase === 2 && allAwakeInSchool) {
         gameState.phase = 3;
-        gameState.callTimer = 80; // Nghỉ một nhịp sau khi bạn cuối cùng vào trường rồi mới bắt đầu gọi tên
+        const backdrop = document.getElementById('reveal-backdrop');
+        if (backdrop) {
+            backdrop.classList.remove('opacity-0');
+            backdrop.classList.add('opacity-100');
+        }
+        updateMainControlButton();
+        gameState.callTimer = 80;
         const teacherTitle = gameState.teacherGender === 'female' ? "Cô giáo" : "Thầy giáo";
         setPhaseBadge("Phát hiện học sinh ngủ quên!");
         showNarrative(`Các bạn tỉnh táo đã vào lớp hết rồi... Ôi kìa! Trên thuyền vẫn còn bạn đang ngủ say!`, "fa-bed");
         setTeacherSpeech(`Các bạn vào lớp hết rồi, để ${teacherTitle.toLowerCase()} xem ai còn ngủ quên trên thuyền nào!`, 180);
     }
 
-    // 6. Xử lý Hàng đợi GỌI TÊN HỌC SINH NGỦ QUÊN (Chỉ chạy ở Phase 3 sau khi các bạn khác đã vào hết lớp)
     if (gameState.phase === 3) {
         if (gameState.callQueue.length > 0) {
             gameState.callTimer--;
-            // Hiệu ứng nhịp trống hồi hộp trước khi xướng tên
             if (gameState.callTimer > 0 && gameState.callTimer < 50 && gameState.callTimer % 8 === 0) {
                 sound.playSuspenseTick(240 + (50 - gameState.callTimer) * 8);
             }
             if (gameState.callTimer <= 0) {
                 const nextId = gameState.callQueue.shift();
                 revealAndCallSleepingStudent(nextId);
-                gameState.callTimer = 155; // Thong thả ~2.6 giây giữa mỗi bạn ngủ quên được gọi tên
+                gameState.callTimer = 155;
             }
         } else {
-            // Đợi bảng Spotlight của học sinh cuối cùng hiển thị xong rồi mới báo kết thúc
             gameState.callTimer--;
             if (gameState.callTimer <= 0) {
                 finishGamePhase4();
@@ -1195,7 +1366,6 @@ function updateGame(now) {
         }
     }
 
-    // Cập nhật hạt Zzz
     for (let i = zzzParticles.length - 1; i >= 0; i--) {
         const z = zzzParticles[i];
         z.y -= 0.75;
@@ -1219,11 +1389,24 @@ function getStudentBoatWorldPos(student) {
 function getWalkPathPosition(student) {
     const startPos = getStudentBoatWorldPos(student);
     const waypoints = [
+
         startPos,
+
+        // bến
         { x: 1185, y: 560 },
-        { x: 1265, y: 540 },
-        { x: 1365, y: 495 },
-        { x: 1445, y: 448 }
+
+        // đường dẫn đến cổng
+        { x: 1280, y: 590 },
+
+        // chính giữa cổng
+        { x: 1360, y: 520 },
+
+        // sân trường
+        { x: 1400, y: 470 },
+
+        // cửa trường
+        { x: 1460, y: 450 }
+
     ];
 
     const p = Math.min(1, Math.max(0, student.walkProgress));
@@ -1247,28 +1430,14 @@ function getWalkPathPosition(student) {
 function renderGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Bầu trời & Mây
     drawSkyAndClouds();
-
-    // 2. Dãy núi xa và Cánh đồng/Ngôi làng cuộn Parallax theo hành trình
     drawScrollingBackgroundScenes();
-
-    // 3. Mặt sông & Các lớp sóng sau thuyền
     drawRiverBackWaves();
-
-    // 4. Bến thuyền xuất phát (Phân cảnh 1) và Bến Trường Học đích (Phân cảnh 4)
     drawStartPierAndDestinationSchool();
-
-    // 5. Con thuyền gỗ, Cô/Thầy giáo lái đò & Các học sinh trên thuyền
+    drawWakeTrails();
     drawBoatAndPassengers();
-
-    // 6. Học sinh tỉnh táo đang đi bộ từ bến thuyền vào cổng trường
     drawWalkingStudents();
-
-    // 7. Lớp sóng nước vỗ mạn thuyền phía trước
     drawRiverFrontWaves();
-
-    // 8. Hiệu ứng Gió, Lá bay & Chữ Zzz ngủ quên
     drawWeatherAndZzzEffects();
 }
 
@@ -1321,17 +1490,9 @@ function drawSkyAndClouds() {
     });
 }
 
-/**
- * Vẽ các phân cảnh làng quê Việt Nam cuộn mượt mà khi thuyền di chuyển:
- * - Phân cảnh 1 (0 - 1100): Làng quê mái tranh, cây đa bến nước, lũy tre làng
- * - Phân cảnh 2 (1100 - 2300): Cánh đồng lúa rộng lớn, hàng cây nghiêng ngả trong gió to
- * - Phân cảnh 3 (2300 - 3500): Hẻm núi đá vôi hùng vĩ & thác nước
- * - Phân cảnh 4 (3500 - 4800): Đồi xanh dẫn vào Bến Trường Học
- */
 function drawScrollingBackgroundScenes() {
     const cam = gameState.cameraX;
 
-    // Lớp núi xa (Parallax 0.35x)
     ctx.save();
     ctx.translate(-cam * 0.35, 0);
     ctx.fillStyle = "#64748b";
@@ -1345,11 +1506,9 @@ function drawScrollingBackgroundScenes() {
     ctx.fill();
     ctx.restore();
 
-    // Lớp bờ sông & cảnh vật các phân cảnh (Parallax 0.8x)
     ctx.save();
     ctx.translate(-cam * 0.8, 0);
 
-    // Đồi cỏ trải dài suốt hành trình
     const hillGrad = ctx.createLinearGradient(0, 420, 0, 535);
     hillGrad.addColorStop(0, "#4ade80");
     hillGrad.addColorStop(1, "#15803d");
@@ -1363,22 +1522,18 @@ function drawScrollingBackgroundScenes() {
     ctx.lineTo(-200, 540);
     ctx.fill();
 
-    // --- CHI TIẾT PHÂN CẢNH 1: NHÀ TRANH LÀNG QUÊ & ĐỐNG RƠM ---
     drawVillageHouse(320, 425, "#f59e0b");
     drawVillageHouse(620, 435, "#eab308");
 
-    // --- CHI TIẾT PHÂN CẢNH 2: CÁNH ĐỒNG LÚA & CỐI XAY GIÓ / Đàn Cò ---
     ctx.fillStyle = "rgba(250, 204, 21, 0.45)";
     ctx.fillRect(1050, 465, 850, 45);
     drawBuffaloOnShore(1350, 475);
     drawBuffaloOnShore(1620, 482);
 
-    // --- CHI TIẾT PHÂN CẢNH 3: NÚI ĐÁ VÔI VỊNH/SÔNG HÙNG VĨ ---
     drawLimestoneKarst(2150, 495, 130, 190);
     drawLimestoneKarst(2480, 500, 155, 230);
     drawLimestoneKarst(2760, 495, 115, 165);
 
-    // Hàng cây ven sông suốt dọc đường nghiêng ngả theo gió
     const treeWorldPositions = [150, 480, 820, 1080, 1280, 1520, 1780, 2020, 2350, 2650, 2980, 3280, 3550];
     treeWorldPositions.forEach((tx, idx) => {
         drawSwayingTree(tx, 485 + (idx % 2) * 10, 0.78 + (idx % 3) * 0.16, idx);
@@ -1390,16 +1545,13 @@ function drawScrollingBackgroundScenes() {
 function drawVillageHouse(x, y, roofColor) {
     ctx.save();
     ctx.translate(x, y);
-    // Tường nhà
     ctx.fillStyle = "#fef3c7";
     ctx.strokeStyle = "#92400e";
     ctx.lineWidth = 2;
     ctx.fillRect(-40, 0, 80, 48);
     ctx.strokeRect(-40, 0, 80, 48);
-    // Cửa gỗ
     ctx.fillStyle = "#78350f";
     ctx.fillRect(-12, 16, 24, 32);
-    // Mái tranh
     ctx.fillStyle = roofColor;
     ctx.beginPath();
     ctx.moveTo(-52, 4);
@@ -1421,7 +1573,6 @@ function drawBuffaloOnShore(x, y) {
     ctx.beginPath();
     ctx.arc(18, -5, 8, 0, Math.PI * 2);
     ctx.fill();
-    // Sừng trâu cong
     ctx.strokeStyle = "#1e293b";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
@@ -1444,7 +1595,6 @@ function drawLimestoneKarst(x, baseY, w, h) {
     ctx.closePath();
     ctx.fill();
 
-    // Thảm thực vật xanh trên đỉnh núi đá
     ctx.fillStyle = "#15803d";
     ctx.beginPath();
     ctx.arc(0, -h + 18, w * 0.22, Math.PI, 0);
@@ -1494,23 +1644,18 @@ function drawRiverBackWaves() {
     riverGrad.addColorStop(1, "#0c4a6e");
 
     ctx.fillStyle = riverGrad;
-    ctx.fillRect(0, 505, 1600, 395);
+    ctx.fillRect(0, 600, 1600, 300);
 
-    drawWaveLayer(535, 8 + gameState.windIntensity * 14, 0.012, 0.06, "rgba(125, 211, 252, 0.28)");
-    drawWaveLayer(575, 10 + gameState.windIntensity * 18, 0.015, -0.08, "rgba(56, 189, 248, 0.35)");
+    drawWaveLayer(610, 8 + gameState.windIntensity * 14, 0.012, 0.06, "rgba(125, 211, 252, 0.28)");
+    drawWaveLayer(650, 10 + gameState.windIntensity * 18, 0.015, -0.08, "rgba(56, 189, 248, 0.35)");
 }
 
-/**
- * Vẽ Bến Đò Làng lúc xuất phát (bên trái) và Ngôi Trường Học lúc về đích (bên phải)
- */
 function drawStartPierAndDestinationSchool() {
     const cam = gameState.cameraX;
 
-    // 1. Bến Đò Làng ở đầu hành trình (Trôi dần về bên trái khi thuyền rời bến)
     if (cam < 900) {
-        ctx.save();
+        ctx.save();drawRiverFrontWaves
         ctx.translate(-cam, 0);
-        // Bờ đất bến làng bên trái
         ctx.fillStyle = "#16a34a";
         ctx.beginPath();
         ctx.moveTo(0, 480);
@@ -1519,7 +1664,6 @@ function drawStartPierAndDestinationSchool() {
         ctx.closePath();
         ctx.fill();
 
-        // Cầu gỗ bến làng
         ctx.fillStyle = "#78350f";
         ctx.fillRect(90, 540, 10, 55);
         ctx.fillRect(140, 540, 10, 55);
@@ -1528,7 +1672,6 @@ function drawStartPierAndDestinationSchool() {
         ctx.roundRect(40, 528, 125, 18, 5);
         ctx.fill();
 
-        // Biển tên BẾN ĐÒ LÀNG
         ctx.fillStyle = "#fef08a";
         ctx.strokeStyle = "#78350f";
         ctx.lineWidth = 2.5;
@@ -1544,7 +1687,6 @@ function drawStartPierAndDestinationSchool() {
         ctx.restore();
     }
 
-    // 2. Bến thuyền & Ngôi trường học xuất hiện ở Phân cảnh cuối (Khi camera tiến gần TOTAL_CAMERA_DISTANCE)
     const schoolOffset = TOTAL_CAMERA_DISTANCE - cam;
     if (schoolOffset < 1600) {
         ctx.save();
@@ -1564,10 +1706,30 @@ function drawShoreDockAndSchool() {
 
     ctx.fillStyle = landGrad;
     ctx.beginPath();
-    ctx.moveTo(1230, 540);
-    ctx.quadraticCurveTo(1320, 430, 1600, 420);
-    ctx.lineTo(1600, 760);
-    ctx.quadraticCurveTo(1360, 730, 1220, 600);
+    // ctx.moveTo(1230, 540);
+    // ctx.quadraticCurveTo(1320, 430, 1600, 420);
+    // ctx.lineTo(1600, 760);
+    // ctx.quadraticCurveTo(1360, 730, 1220, 600);
+    ctx.moveTo(1180, 520);
+
+    ctx.quadraticCurveTo(
+        1350,
+        380,
+        1600,
+        400
+    );
+
+    ctx.lineTo(
+        1600,
+        760
+    );
+
+    ctx.quadraticCurveTo(
+        1350,
+        700,
+        1160,
+        660
+    );
     ctx.closePath();
     ctx.fill();
 
@@ -1575,7 +1737,6 @@ function drawShoreDockAndSchool() {
     ctx.lineWidth = 4;
     ctx.stroke();
 
-    // Con đường lát gạch vàng từ bến thuyền dẫn vào cổng trường
     ctx.fillStyle = "#fde68a";
     ctx.strokeStyle = "#d97706";
     ctx.lineWidth = 3;
@@ -1588,7 +1749,6 @@ function drawShoreDockAndSchool() {
     ctx.fill();
     ctx.stroke();
 
-    // Bến thuyền gỗ (Cầu cảng)
     ctx.fillStyle = "#78350f";
     [1175, 1215, 1255].forEach(px => {
         ctx.fillRect(px, 545, 12, 65);
@@ -1601,21 +1761,50 @@ function drawShoreDockAndSchool() {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // NGÔI TRƯỜNG VIỆT NAM
     const schoolX = 1355;
     const schoolY = 265;
 
     ctx.fillStyle = "#fef08a";
     ctx.strokeStyle = "#ca8a04";
     ctx.lineWidth = 3;
-    ctx.fillRect(schoolX, schoolY + 60, 220, 130);
-    ctx.strokeRect(schoolX, schoolY + 60, 220, 130);
+    ctx.fillRect(schoolX, schoolY + 60, 260, 150);
+    ctx.strokeRect(schoolX, schoolY + 60, 260, 150);
+
+    // ======================================================
+    // HÀNG CỘT MẶT TIỀN TRƯỜNG
+    // ======================================================
+
+    for (let i = 0; i < 4; i++) {
+
+        const pillarX =
+            schoolX + 40 + i * 55;
+
+        ctx.fillStyle = "#f8fafc";
+
+        ctx.fillRect(
+            pillarX,
+            schoolY + 60,
+            10,
+            130
+        );
+
+        ctx.strokeStyle = "#cbd5e1";
+
+        ctx.lineWidth = 1.5;
+
+        ctx.strokeRect(
+            pillarX,
+            schoolY + 60,
+            10,
+            130
+        );
+    }
 
     ctx.fillStyle = "#dc2626";
     ctx.beginPath();
-    ctx.moveTo(schoolX - 18, schoolY + 62);
-    ctx.lineTo(schoolX + 110, schoolY + 5);
-    ctx.lineTo(schoolX + 238, schoolY + 62);
+    ctx.moveTo(schoolX - 25, schoolY + 62);
+    ctx.lineTo(schoolX + 130, schoolY - 10);
+    ctx.lineTo(schoolX + 285, schoolY + 62);
     ctx.closePath();
     ctx.fill();
     ctx.strokeStyle = "#991b1b";
@@ -1623,69 +1812,377 @@ function drawShoreDockAndSchool() {
 
     ctx.fillStyle = "#ffffff";
     ctx.beginPath();
-    ctx.arc(schoolX + 110, schoolY + 40, 14, 0, Math.PI * 2);
+    ctx.arc(schoolX + 130, schoolY + 42, 10, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
     ctx.fillStyle = "#7c2d12";
     ctx.beginPath();
-    ctx.roundRect(schoolX + 88, schoolY + 115, 44, 75, [12, 12, 0, 0]);
+    ctx.roundRect(schoolX + 108, schoolY + 115, 44, 75, [12, 12, 0, 0]);
     ctx.fill();
 
     ctx.fillStyle = "#38bdf8";
-    ctx.fillRect(schoolX + 24, schoolY + 105, 40, 42);
-    ctx.fillRect(schoolX + 156, schoolY + 105, 40, 42);
-    ctx.strokeStyle = "#0284c7";
-    ctx.strokeRect(schoolX + 24, schoolY + 105, 40, 42);
-    ctx.strokeRect(schoolX + 156, schoolY + 105, 40, 42);
+    // ctx.fillRect(schoolX + 24, schoolY + 105, 40, 42);
+    // ctx.fillRect(schoolX + 156, schoolY + 105, 40, 42);
+    const windows = [
+        20,
+        200
+    ];
 
-    const gateX = 1390;
-    const gateY = 385;
-    ctx.fillStyle = "#f97316";
-    ctx.fillRect(gateX, gateY, 16, 75);
-    ctx.fillRect(gateX + 95, gateY, 16, 75);
+    windows.forEach(offset => {
+
+        ctx.fillStyle = "#7dd3fc";
+
+        ctx.fillRect(
+            schoolX + offset,
+            schoolY + 105,
+            40,
+            42
+        );
+
+        ctx.strokeStyle = "#0284c7";
+
+        ctx.strokeRect(
+            schoolX + offset,
+            schoolY + 105,
+            40,
+            42
+        );
+
+    });
+    // ctx.strokeStyle = "#0284c7";
+    // ctx.strokeRect(schoolX + 24, schoolY + 105, 40, 42);
+    // ctx.strokeRect(schoolX + 156, schoolY + 105, 40, 42);
+
+    // const gateX = 1390;
+    // const gateY = 570;
+    // ctx.fillStyle = "#f97316";
+    // ctx.fillRect(gateX, gateY, 16, 45);
+    // ctx.fillRect(gateX + 95, gateY, 16, 45);
+
+
+    // ctx.fillStyle = "#1d4ed8";
+    // ctx.beginPath();
+    // ctx.roundRect(gateX - 12, gateY - 26, 135, 30, 8);
+    // ctx.fill();
+    // ctx.strokeStyle = "#fef08a";
+    // ctx.lineWidth = 2;
+    // ctx.stroke();
+
+    // ctx.fillStyle = "#ffffff";
+    // ctx.font = "800 13px 'Baloo 2', sans-serif";
+    // ctx.textAlign = "center";
+    // ctx.fillText("TRƯỜNG THCS", gateX + 55, gateY - 7);
+
+    // ======================================================
+    // SÂN TRƯỜNG
+    // ======================================================
+
+    ctx.fillStyle = "#d1d5db";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        schoolX - 15,
+        schoolY + 210
+    );
+
+    ctx.lineTo(
+        schoolX + 280,
+        schoolY + 210
+    );
+
+    ctx.lineTo(
+        schoolX + 310,
+        schoolY + 260
+    );
+
+    ctx.lineTo(
+        schoolX - 45,
+        schoolY + 260
+    );
+
+    ctx.closePath();
+    ctx.fill();
+
+    // Viền sân
+
+    ctx.strokeStyle = "#9ca3af";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // ======================================================
+    // CỔNG TRƯỜNG
+    // ======================================================
+
+    const gateLeftX = 1295;
+    const gateRightX = 1425;
+    const gateY = 500;
+
+    // Hai trụ cổng
+
+    ctx.fillStyle = "#ea580c";
+
+    ctx.fillRect(
+        gateLeftX,
+        gateY,
+        22,
+        90
+    );
+
+    ctx.fillRect(
+        gateRightX,
+        gateY,
+        22,
+        90
+    );
+
+    // Viền trụ
+
+    ctx.strokeStyle = "#9a3412";
+    ctx.lineWidth = 2;
+
+    ctx.strokeRect(
+        gateLeftX,
+        gateY,
+        22,
+        90
+    );
+
+    ctx.strokeRect(
+        gateRightX,
+        gateY,
+        22,
+        90
+    );
+
+    // Biển cổng
 
     ctx.fillStyle = "#1d4ed8";
+
     ctx.beginPath();
-    ctx.roundRect(gateX - 12, gateY - 26, 135, 30, 8);
+
+    ctx.roundRect(
+        gateLeftX - 5,
+        gateY - 34,
+        160,
+        30,
+        8
+    );
+
     ctx.fill();
+
     ctx.strokeStyle = "#fef08a";
     ctx.lineWidth = 2;
     ctx.stroke();
 
     ctx.fillStyle = "#ffffff";
-    ctx.font = "800 13px 'Baloo 2', sans-serif";
+    ctx.font = "800 11px 'Baloo 2', sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("TRƯỜNG HỌC", gateX + 55, gateY - 7);
 
-    const flagPoleX = schoolX + 45;
+    ctx.fillText(
+        "TRƯỜNG THCS THUẬN THÀNH",
+        gateLeftX + 77,
+        gateY - 16
+    );
+
+    // ======================================================
+    // QUỐC KỲ VIỆT NAM
+    // ======================================================
+
+    // Đặt cột cờ vào chính giữa trường
+    const flagPoleX = schoolX + 110;
     const flagPoleY = schoolY - 55;
+
+    // Cột cờ
     ctx.strokeStyle = "#cbd5e1";
     ctx.lineWidth = 4;
+
     ctx.beginPath();
     ctx.moveTo(flagPoleX, schoolY + 25);
     ctx.lineTo(flagPoleX, flagPoleY);
     ctx.stroke();
 
-    const waveOffset = Math.sin(gameState.time * 0.18) * 6;
-    ctx.fillStyle = "#ef4444";
+    // Độ phấp phới của cờ
+    const waveOffset =
+        Math.sin(gameState.time * 0.18) * 6;
+
+    // ======================================================
+    // BÓNG CỜ ĐỔ XUỐNG MÁI TRƯỜNG
+    // ======================================================
+
+    ctx.save();
+
+    ctx.globalAlpha = 0.08;
+    ctx.fillStyle = "#000000";
+
     ctx.beginPath();
-    ctx.moveTo(flagPoleX, flagPoleY);
-    ctx.quadraticCurveTo(flagPoleX + 24, flagPoleY + waveOffset, flagPoleX + 48, flagPoleY + 4);
-    ctx.lineTo(flagPoleX + 48, flagPoleY + 32);
-    ctx.quadraticCurveTo(flagPoleX + 24, flagPoleY + 28 + waveOffset, flagPoleX, flagPoleY + 28);
+
+    ctx.moveTo(
+        flagPoleX + 8,
+        schoolY + 30
+    );
+
+    ctx.quadraticCurveTo(
+        flagPoleX + 28,
+        schoolY + 35 + waveOffset * 0.4,
+        flagPoleX + 48,
+        schoolY + 42
+    );
+
+    ctx.lineTo(
+        flagPoleX + 42,
+        schoolY + 58
+    );
+
+    ctx.quadraticCurveTo(
+        flagPoleX + 24,
+        schoolY + 50 + waveOffset * 0.4,
+        flagPoleX + 8,
+        schoolY + 46
+    );
+
     ctx.closePath();
     ctx.fill();
 
-    ctx.fillStyle = "#facc15";
+    ctx.restore();
+
+    // ======================================================
+    // LÁ CỜ ĐỎ
+    // ======================================================
+
+    ctx.fillStyle = "#da251d";
+
     ctx.beginPath();
-    ctx.arc(flagPoleX + 23, flagPoleY + 15, 5, 0, Math.PI * 2);
+
+    ctx.moveTo(flagPoleX, flagPoleY);
+
+    ctx.quadraticCurveTo(
+        flagPoleX + 24,
+        flagPoleY + waveOffset,
+        flagPoleX + 48,
+        flagPoleY + 4
+    );
+
+    ctx.lineTo(
+        flagPoleX + 48,
+        flagPoleY + 32
+    );
+
+    ctx.quadraticCurveTo(
+        flagPoleX + 24,
+        flagPoleY + 28 + waveOffset,
+        flagPoleX,
+        flagPoleY + 28
+    );
+
+    ctx.closePath();
     ctx.fill();
+
+    // Viền cờ
+
+    ctx.strokeStyle = "#991b1b";
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Highlight ánh sáng mép trên
+
+    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    ctx.lineWidth = 1;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        flagPoleX + 2,
+        flagPoleY + 2
+    );
+
+    ctx.quadraticCurveTo(
+        flagPoleX + 24,
+        flagPoleY - 2 + waveOffset,
+        flagPoleX + 46,
+        flagPoleY + 6
+    );
+
+    ctx.stroke();
+
+    // ======================================================
+    // SAO VÀNG 5 CÁNH
+    // ======================================================
+
+    const starX =
+        flagPoleX + 24;
+
+    const starY =
+        flagPoleY + 16 + waveOffset * 0.15;
+
+    ctx.save();
+
+    ctx.translate(starX, starY);
+
+    ctx.fillStyle = "#fde047";
+
+    ctx.beginPath();
+
+    for (let i = 0; i < 5; i++) {
+
+        const outerAngle =
+            (-Math.PI / 2) +
+            i * (Math.PI * 2 / 5);
+
+        const innerAngle =
+            outerAngle + (Math.PI / 5);
+
+        const outerRadius = 7.5;
+        const innerRadius = 3.2;
+
+        if (i === 0) {
+
+            ctx.moveTo(
+                Math.cos(outerAngle) * outerRadius,
+                Math.sin(outerAngle) * outerRadius
+            );
+
+        } else {
+
+            ctx.lineTo(
+                Math.cos(outerAngle) * outerRadius,
+                Math.sin(outerAngle) * outerRadius
+            );
+        }
+
+        ctx.lineTo(
+            Math.cos(innerAngle) * innerRadius,
+            Math.sin(innerAngle) * innerRadius
+        );
+    }
+
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = "#fef9c3";
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    ctx.restore();
 
     ctx.restore();
 }
 
-// 5. Vẽ Con thuyền gỗ, Cô giáo/Thầy giáo và các Học sinh trên thuyền
+function drawWakeTrails() {
+    if (wakeTrails.length === 0) return;
+    ctx.save();
+    wakeTrails.forEach(w => {
+        ctx.globalAlpha = Math.max(0, w.alpha);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.ellipse(w.x, w.y, w.rx, w.ry, 0, 0, Math.PI * 2);
+        ctx.stroke();
+    });
+    ctx.restore();
+}
+
 function drawBoatAndPassengers() {
     ctx.save();
     ctx.translate(gameState.boat.x, gameState.boat.y);
@@ -1741,6 +2238,16 @@ function drawBoatAndPassengers() {
     ctx.save();
     ctx.translate(195, -5);
     ctx.rotate(gameState.boat.oarAngle);
+
+    const armLift = gameState.boat.oarAngle * 24;
+    ctx.strokeStyle = "#fed7aa";
+    ctx.lineWidth = 6.5;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(10, -28);
+    ctx.lineTo(-10, -14 + armLift);
+    ctx.stroke();
+
     ctx.strokeStyle = "#78350f";
     ctx.lineWidth = 6;
     ctx.beginPath();
@@ -1876,10 +2383,18 @@ function drawStudentCharacter(student, onBoat = true) {
         ctx.rotate(Math.sin(gameState.time * 0.15 + student.id) * 0.12);
     } else if (isStanding) {
         ctx.translate(0, -10);
+    } else if (student.state === 'sitting' && onBoat) {
+        const bodySway = Math.sin(gameState.time * 0.07 + student.id * 0.8) * 1.4;
+        const headBob = Math.sin(gameState.time * 0.11 + student.id * 1.1) * 0.045;
+        ctx.translate(0, bodySway);
+        ctx.rotate(headBob);
     }
 
     if (isWalking) {
         const legSwing = Math.sin(student.stepPhase) * 8;
+        const armSwing = -Math.sin(student.stepPhase) * 0.35;
+        const walkBob = -Math.abs(Math.cos(student.stepPhase)) * 2.2;
+        ctx.translate(0, walkBob);
         ctx.strokeStyle = "#1e293b";
         ctx.lineWidth = 5;
         ctx.lineCap = "round";
@@ -1889,6 +2404,19 @@ function drawStudentCharacter(student, onBoat = true) {
         ctx.moveTo(4, 6);
         ctx.lineTo(4 + legSwing, 22);
         ctx.stroke();
+
+        ctx.save();
+        ctx.translate(0, -12);
+        ctx.rotate(armSwing);
+        ctx.strokeStyle = student.color;
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        ctx.moveTo(-12, 0);
+        ctx.lineTo(-15, 13);
+        ctx.moveTo(12, 0);
+        ctx.lineTo(15, 13);
+        ctx.stroke();
+        ctx.restore();
     }
 
     ctx.fillStyle = student.color;
@@ -1961,38 +2489,43 @@ function drawStudentCharacter(student, onBoat = true) {
 function drawStudentNameLabel(student, baseX, baseY) {
     ctx.save();
 
-    const tierOffset = student.labelTier * 22;
-    const labelY = baseY - 62 - tierOffset;
+    const tierOffset = student.labelTier * 26;
+    const labelY = baseY - 66 - tierOffset;
 
     const isSleeping = student.state === 'sleeping';
 
-    ctx.strokeStyle = isSleeping ? "rgba(168, 85, 247, 0.8)" : "rgba(255, 255, 255, 0.75)";
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = isSleeping ? "rgba(253, 224, 71, 0.9)" : "rgba(15, 23, 42, 0.65)";
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(baseX, labelY + 10);
+    ctx.moveTo(baseX, labelY + 12);
     ctx.lineTo(baseX, baseY - 45);
     ctx.stroke();
 
-    ctx.font = "800 12px 'Nunito', sans-serif";
+    ctx.font = "900 15px 'Nunito', sans-serif";
     const displayText = isSleeping ? `💤 ${student.name}` : student.name;
     const textWidth = ctx.measureText(displayText).width;
-    const boxW = textWidth + 14;
-    const boxH = 20;
+    const boxW = textWidth + 18;
+    const boxH = 24;
+
+    ctx.shadowColor = "rgba(15, 23, 42, 0.35)";
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetY = 2;
 
     ctx.fillStyle = student.called
-        ? "#6b21a8"
+        ? "#581c87"
         : isSleeping
-            ? "#9333ea"
-            : "rgba(255, 255, 255, 0.94)";
-    ctx.strokeStyle = isSleeping ? "#fde047" : "#0284c7";
-    ctx.lineWidth = 2;
+            ? "#7e22ce"
+            : "#ffffff";
+    ctx.strokeStyle = isSleeping ? "#fde047" : "#0f172a";
+    ctx.lineWidth = 2.5;
 
     ctx.beginPath();
-    ctx.roundRect(baseX - boxW / 2, labelY - boxH / 2, boxW, boxH, 7);
+    ctx.roundRect(baseX - boxW / 2, labelY - boxH / 2, boxW, boxH, 8);
     ctx.fill();
+    ctx.shadowColor = "transparent";
     ctx.stroke();
 
-    ctx.fillStyle = isSleeping ? "#fef08a" : "#0f172a";
+    ctx.fillStyle = isSleeping ? "#fef08a" : "#020617";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(displayText, baseX, labelY + 0.5);
@@ -2048,8 +2581,8 @@ function drawTeacherSpeechBubble() {
 }
 
 function drawRiverFrontWaves() {
-    drawWaveLayer(625, 12 + gameState.windIntensity * 22, 0.016, 0.09, "rgba(14, 165, 233, 0.65)");
-    drawWaveLayer(675, 10 + gameState.windIntensity * 16, 0.013, -0.07, "rgba(3, 105, 161, 0.8)");
+    drawWaveLayer(700, 12 + gameState.windIntensity * 22, 0.016, 0.09, "rgba(14, 165, 233, 0.65)");
+    drawWaveLayer(740, 10 + gameState.windIntensity * 16, 0.013, -0.07, "rgba(3, 105, 161, 0.8)");
 }
 
 function drawWaveLayer(baseY, amplitude, freq, speed, color) {
@@ -2115,29 +2648,6 @@ function drawWeatherAndZzzEffects() {
 // TƯƠNG TÁC SỰ KIỆN & MODAL CÀI ĐẶT
 // ============================================================================
 
-// Cho phép click trực tiếp vào một học sinh trên thuyền để gọi tên ngủ quên ngay lập tức
-canvas.addEventListener('click', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const clickX = (e.clientX - rect.left) * scaleX;
-    const clickY = (e.clientY - rect.top) * scaleY;
-
-    for (let i = gameState.students.length - 1; i >= 0; i--) {
-        const s = gameState.students[i];
-        if ((s.state === 'sitting' || s.state === 'sleeping') && !s.called) {
-            const pos = getStudentBoatWorldPos(s);
-            const dist = Math.hypot(clickX - pos.x, clickY - (pos.y - 25));
-            if (dist < 32) {
-                sound.init();
-                revealAndCallSleepingStudent(s.id);
-                break;
-            }
-        }
-    }
-});
-
-// Chọn nhanh thời gian chơi trên thanh Header
 const quickDurationSelect = document.getElementById('quick-duration-select');
 quickDurationSelect.addEventListener('change', (e) => {
     const sec = parseInt(e.target.value, 10) || 20;
@@ -2149,35 +2659,21 @@ quickDurationSelect.addEventListener('change', (e) => {
     }
 });
 
-document.getElementById('btn-start').addEventListener('click', () => {
-    startJourney();
-});
-
-document.getElementById('btn-pause').addEventListener('click', () => {
-    gameState.paused = !gameState.paused;
-    gameState.lastFrameTimestamp = performance.now();
-    updatePauseButtonUI();
-    if (gameState.paused) {
-        sound.stopWindAmbience();
+document.getElementById('btn-main-control').addEventListener('click', () => {
+    if (gameState.phase === 0) {
+        startJourney();
     } else if (gameState.phase === 1) {
-        sound.startWindAmbience(gameState.windIntensity);
+        gameState.paused = !gameState.paused;
+        gameState.lastFrameTimestamp = performance.now();
+        updateMainControlButton();
+        if (gameState.paused) {
+            sound.stopWindAmbience();
+            narration.pause();
+        } else {
+            sound.startWindAmbience(gameState.windIntensity);
+            narration.resume();
+        }
     }
-});
-
-function updatePauseButtonUI() {
-    const icon = document.getElementById('icon-pause');
-    const text = document.getElementById('text-pause');
-    if (gameState.paused) {
-        icon.className = "fa-solid fa-play";
-        text.textContent = "TIẾP TỤC";
-    } else {
-        icon.className = "fa-solid fa-pause";
-        text.textContent = "TẠM DỪNG";
-    }
-}
-
-document.getElementById('btn-call').addEventListener('click', () => {
-    manualCallSleepingStudentButton();
 });
 
 document.getElementById('btn-dock').addEventListener('click', () => {
@@ -2188,21 +2684,47 @@ document.getElementById('btn-reset').addEventListener('click', () => {
     resetGame();
 });
 
+document.getElementById('btn-close-summary')?.addEventListener('click', () => {
+    document.getElementById('summary-modal')?.classList.add('hidden');
+});
+
+document.getElementById('btn-voice').addEventListener('click', () => {
+    const enabled = narration.toggle();
+    document.getElementById('icon-voice').className = enabled
+        ? 'fa-solid fa-microphone-lines' : 'fa-solid fa-microphone-lines-slash';
+    const button = document.getElementById('btn-voice');
+    button.setAttribute('aria-pressed', String(enabled));
+    button.setAttribute('aria-label', enabled ? 'Tắt lồng tiếng' : 'Bật lồng tiếng');
+    button.title = enabled ? 'Tắt lồng tiếng' : 'Bật lồng tiếng';
+});
+
 document.getElementById('btn-sound').addEventListener('click', () => {
     const enabled = sound.toggle();
     const icon = document.getElementById('icon-sound');
     icon.className = enabled ? "fa-solid fa-volume-high" : "fa-solid fa-volume-xmark";
 });
 
-// Quản lý Modal Cài đặt
 const settingsModal = document.getElementById('settings-modal');
 const inputStudentList = document.getElementById('input-student-list');
 const studentCountBadge = document.getElementById('student-count-badge');
+const studentLimitNote = document.getElementById('student-limit-note');
 const manualCheckboxList = document.getElementById('manual-checkbox-list');
+const inputCallCount = document.getElementById('input-call-count');
+let pendingManualSelectedIndices = new Set();
 
 function openSettingsModal() {
-    inputStudentList.value = gameState.studentNames.join('\n');
+    if (gameState.hasSavedList && gameState.studentNames.length > 0) {
+        inputStudentList.value = gameState.studentNames.join('\n');
+        pendingManualSelectedIndices = new Set(
+            Array.from(gameState.manualSelectedIndices).filter(i => i >= 0 && i < gameState.studentNames.length)
+        );
+    } else {
+        inputStudentList.value = '';
+        pendingManualSelectedIndices = new Set();
+    }
+
     document.getElementById('input-game-duration').value = gameState.totalDuration;
+    inputCallCount.value = clampStudentCount(gameState.callCount, 2);
     updateModalStudentPreview();
     settingsModal.classList.remove('hidden');
 }
@@ -2211,22 +2733,42 @@ function closeSettingsModal() {
     settingsModal.classList.add('hidden');
 }
 
-function getParsedStudentListFromTextarea() {
+function getRawParsedStudentLines() {
     return inputStudentList.value
         .split('\n')
         .map(s => s.trim())
         .filter(s => s.length > 0);
 }
 
+function getParsedStudentListFromTextarea() {
+    return getRawParsedStudentLines().slice(0, MAX_STUDENTS);
+}
+
 function updateModalStudentPreview() {
-    const list = getParsedStudentListFromTextarea();
-    studentCountBadge.textContent = `${list.length} học sinh`;
+    const rawLines = getRawParsedStudentLines();
+    const list = rawLines.slice(0, MAX_STUDENTS);
+    const exceeded = rawLines.length > MAX_STUDENTS;
+
+    studentCountBadge.textContent = `${list.length} / ${MAX_STUDENTS} học sinh`;
+    if (exceeded) {
+        studentCountBadge.classList.remove('bg-indigo-100', 'text-indigo-800');
+        studentCountBadge.classList.add('bg-amber-100', 'text-amber-900');
+        studentLimitNote.textContent = `Đã nhập ${rawLines.length} dòng — hệ thống chỉ áp dụng tối đa ${MAX_STUDENTS} học sinh đầu tiên.`;
+        studentLimitNote.classList.remove('text-slate-500');
+        studentLimitNote.classList.add('text-amber-700');
+    } else {
+        studentCountBadge.classList.remove('bg-amber-100', 'text-amber-900');
+        studentCountBadge.classList.add('bg-indigo-100', 'text-indigo-800');
+        studentLimitNote.textContent = `Tối thiểu ${MIN_STUDENTS} học sinh, tối đa ${MAX_STUDENTS} học sinh. Danh sách sẽ được ghi nhớ sau khi bấm Lưu & Áp dụng.`;
+        studentLimitNote.classList.remove('text-amber-700');
+        studentLimitNote.classList.add('text-slate-500');
+    }
 
     manualCheckboxList.innerHTML = '';
     list.forEach((name, idx) => {
         const label = document.createElement('label');
         label.className = "flex items-center gap-2 p-1.5 rounded-lg hover:bg-purple-50 cursor-pointer";
-        const checked = gameState.manualSelectedIndices.has(idx) ? 'checked' : '';
+        const checked = pendingManualSelectedIndices.has(idx) ? 'checked' : '';
         label.innerHTML = `
             <input type="checkbox" data-idx="${idx}" class="manual-student-cb w-4 h-4 accent-purple-600 rounded" ${checked}>
             <span class="truncate">${idx + 1}. ${name}</span>
@@ -2238,53 +2780,34 @@ function updateModalStudentPreview() {
         cb.addEventListener('change', (e) => {
             const id = parseInt(e.target.getAttribute('data-idx'), 10);
             if (e.target.checked) {
-                gameState.manualSelectedIndices.add(id);
+                pendingManualSelectedIndices.add(id);
             } else {
-                gameState.manualSelectedIndices.delete(id);
+                pendingManualSelectedIndices.delete(id);
             }
             document.getElementById('manual-selected-count').textContent =
-                `Đã chọn: ${gameState.manualSelectedIndices.size}`;
+                `Đã chọn: ${pendingManualSelectedIndices.size}`;
         });
     });
 
     document.getElementById('manual-selected-count').textContent =
-        `Đã chọn: ${gameState.manualSelectedIndices.size}`;
+        `Đã chọn: ${pendingManualSelectedIndices.size}`;
 }
 
 inputStudentList.addEventListener('input', () => {
-    gameState.manualSelectedIndices.clear();
+    const currentCount = getParsedStudentListFromTextarea().length;
+    pendingManualSelectedIndices = new Set(
+        Array.from(pendingManualSelectedIndices).filter(idx => idx < currentCount)
+    );
     updateModalStudentPreview();
 });
 
-document.getElementById('btn-sample-10').addEventListener('click', () => {
-    inputStudentList.value = DEFAULT_STUDENTS.slice(0, 10).join('\n');
-    gameState.manualSelectedIndices.clear();
-    updateModalStudentPreview();
-});
-
-document.getElementById('btn-sample-16').addEventListener('click', () => {
-    const extra = [...DEFAULT_STUDENTS, "Thanh Trúc", "Hữu Phước", "Ngọc Hân", "Anh Tuấn"];
-    inputStudentList.value = extra.join('\n');
-    gameState.manualSelectedIndices.clear();
-    updateModalStudentPreview();
-});
-
-document.getElementById('btn-sample-24').addEventListener('click', () => {
-    const full24 = [
-        ...DEFAULT_STUDENTS,
-        "Thanh Trúc", "Hữu Phước", "Ngọc Hân", "Anh Tuấn",
-        "Nhật Minh", "Kim Ngân", "Quang Vinh", "Thùy Dương",
-        "Bình Minh", "Tuyết Nhi", "Trọng Nghĩa", "Mỹ Tâm"
-    ];
-    inputStudentList.value = full24.join('\n');
-    gameState.manualSelectedIndices.clear();
-    updateModalStudentPreview();
+inputCallCount.addEventListener('change', (e) => {
+    e.target.value = clampStudentCount(e.target.value, 1);
 });
 
 document.querySelectorAll('input[name="callMode"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
         const mode = e.target.value;
-        gameState.callMode = mode;
         if (mode === 'random') {
             document.getElementById('random-config-box').classList.remove('hidden');
             document.getElementById('manual-config-box').classList.add('hidden');
@@ -2297,8 +2820,8 @@ document.querySelectorAll('input[name="callMode"]').forEach(radio => {
 
 document.querySelectorAll('.quick-count-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-        const c = parseInt(btn.getAttribute('data-count'), 10);
-        document.getElementById('input-call-count').value = c;
+        const c = clampStudentCount(btn.getAttribute('data-count'), 1);
+        inputCallCount.value = c;
     });
 });
 
@@ -2314,14 +2837,23 @@ document.getElementById('btn-close-settings').addEventListener('click', closeSet
 
 document.getElementById('btn-save-settings').addEventListener('click', () => {
     const parsed = getParsedStudentListFromTextarea();
-    if (parsed.length > 0) {
-        gameState.studentNames = parsed;
+    if (parsed.length < MIN_STUDENTS) {
+        alert(`Vui lòng nhập ít nhất ${MIN_STUDENTS} học sinh (tối đa ${MAX_STUDENTS} học sinh).`);
+        inputStudentList.focus();
+        return;
     }
+
+    gameState.studentNames = parsed;
+    gameState.hasSavedList = true;
+    saveStudentsToStorage(parsed);
+
+    gameState.manualSelectedIndices = new Set(
+        Array.from(pendingManualSelectedIndices).filter(idx => idx >= 0 && idx < parsed.length)
+    );
 
     const durationVal = parseInt(document.getElementById('input-game-duration').value, 10);
     gameState.totalDuration = isNaN(durationVal) || durationVal < 5 ? 20 : durationVal;
 
-    // Đồng bộ dropdown chọn nhanh nếu có giá trị tương ứng
     const optExists = Array.from(quickDurationSelect.options).some(o => parseInt(o.value, 10) === gameState.totalDuration);
     if (optExists) {
         quickDurationSelect.value = String(gameState.totalDuration);
@@ -2337,8 +2869,9 @@ document.getElementById('btn-save-settings').addEventListener('click', () => {
         gameState.callMode = modeRadio.value;
     }
 
-    const callCountVal = parseInt(document.getElementById('input-call-count').value, 10);
-    gameState.callCount = isNaN(callCountVal) || callCountVal < 1 ? 1 : callCountVal;
+    const boundedCallCount = clampStudentCount(inputCallCount.value, 1);
+    inputCallCount.value = boundedCallCount;
+    gameState.callCount = boundedCallCount;
 
     closeSettingsModal();
     resetGame();
@@ -2355,6 +2888,11 @@ function gameLoop(now) {
 
 window.onload = function () {
     initEnvironment();
+    const saved = loadSavedStudentsFromStorage();
+    if (saved && saved.length > 0) {
+        gameState.studentNames = saved;
+        gameState.hasSavedList = true;
+    }
     buildStudentsData();
     requestAnimationFrame(gameLoop);
 };
